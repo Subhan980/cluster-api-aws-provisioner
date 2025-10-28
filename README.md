@@ -13,10 +13,11 @@ It allows you to define, deploy, and manage complete EKS or self-managed cluster
 allowing you to manage clusters just like any other Kubernetes resource.
 
 This implementation automates:
-- VPC and networking creation
-- Control plane and worker node provisioning
-- Cluster scaling and upgrade workflows
-- Multi-cluster management from a single management cluster
+
+- VPC and networking creation  
+- Control plane and worker node provisioning  
+- Cluster scaling and upgrade workflows  
+- Multi-cluster management from a single management cluster  
 
 ---
 
@@ -46,30 +47,34 @@ This implementation automates:
 
 ## 🏗️ Architecture
 
-         +-------------------------------------------+
-         |          Management Cluster               |
-         |-------------------------------------------|
-         | Cluster API + CAPA Controllers             |
-         | Custom Resources (Cluster, Machine, etc.)  |
-         +-------------------------------------------+
-                          │
-                          ▼
-         +-------------------------------------------+
-         |        AWS Infrastructure Provider         |
-         | (VPCs, Subnets, EC2, IAM, EKS)             |
-         +-------------------------------------------+
-                          │
-                          ▼
-         +-------------------------------------------+
-         |         Target Kubernetes Cluster          |
-         |  (Control Plane + Worker Nodes)            |
-         +-------------------------------------------+
-                          │
-                          ▼
-         +-------------------------------------------+
-         |         Observability & Automation         |
-         | (Prometheus, Grafana, Loki, Alerts)        |
-         +-------------------------------------------+
+pgsql
+Copy code
+     +-------------------------------------------+
+     |          Management Cluster               |
+     |-------------------------------------------|
+     | Cluster API + CAPA Controllers             |
+     | Custom Resources (Cluster, Machine, etc.)  |
+     +-------------------------------------------+
+                      │
+                      ▼
+     +-------------------------------------------+
+     |        AWS Infrastructure Provider         |
+     | (VPCs, Subnets, EC2, IAM, EKS)             |
+     +-------------------------------------------+
+                      │
+                      ▼
+     +-------------------------------------------+
+     |         Target Kubernetes Cluster          |
+     |  (Control Plane + Worker Nodes)            |
+     +-------------------------------------------+
+                      │
+                      ▼
+     +-------------------------------------------+
+     |         Observability & Automation         |
+     | (Prometheus, Grafana, Loki, Alerts)        |
+     +-------------------------------------------+
+yaml
+Copy code
 
 ---
 
@@ -77,10 +82,10 @@ This implementation automates:
 
 ### 1️⃣ Prerequisites
 
-- AWS Account with programmatic access (CLI credentials)
-- A running management Kubernetes cluster
-- `kubectl`, `clusterctl`, and `aws` CLI installed
-- IAM permissions for EC2, VPC, and IAM resource creation
+- AWS Account with programmatic access (CLI credentials)  
+- A running management Kubernetes cluster  
+- `kubectl`, `clusterctl`, and `aws` CLI installed  
+- IAM permissions for EC2, VPC, and IAM resource creation  
 
 ---
 
@@ -93,14 +98,19 @@ This installs:
 Cluster API core components
 
 Cluster API AWS provider (CAPA)
+
 3️⃣ Generate Cluster Manifests
+bash
+Copy code
 clusterctl generate cluster aws-demo \
   --infrastructure aws \
   --kubernetes-version v1.29.0 \
   --control-plane-machine-count=1 \
   --worker-machine-count=2 > aws-cluster.yaml
-  4️⃣ Apply and Create the Cluster
-  kubectl apply -f aws-cluster.yaml
+4️⃣ Apply and Create the Cluster
+bash
+Copy code
+kubectl apply -f aws-cluster.yaml
 CAPI and CAPA will automatically:
 
 Create VPC, subnets, and security groups
@@ -108,14 +118,21 @@ Create VPC, subnets, and security groups
 Deploy the control plane and worker nodes
 
 Register the new cluster for management
+
 5️⃣ Verify the Cluster
+bash
+Copy code
 kubectl get clusters
 kubectl get machines
-
 Once provisioning completes, fetch the kubeconfig:
+
+bash
+Copy code
 clusterctl get kubeconfig aws-demo > demo.kubeconfig
 kubectl --kubeconfig=demo.kubeconfig get nodes
 📦 Repository Structure
+bash
+Copy code
 📁 cluster-api-aws-provisioner/
  ├── config/                  # Cluster API configuration templates
  ├── manifests/               # Generated YAML for clusters and machines
@@ -123,8 +140,7 @@ kubectl --kubeconfig=demo.kubeconfig get nodes
  ├── docs/                    # Documentation and architecture notes
  ├── .github/workflows/       # Optional CI/CD automation
  └── README.md
-Future Enhancements
-
+🧩 Future Enhancements
 🔹 Automate teardown and cleanup workflows
 
 🔹 Integrate AWS SSM for secure node access
@@ -134,8 +150,8 @@ Future Enhancements
 🔹 Support multi-region cluster provisioning
 
 🔹 Integrate cost dashboards and usage insights
-🤝 Contributing
 
+🤝 Contributing
 Contributions are welcome!
 You can:
 
@@ -146,11 +162,9 @@ Add new automation scripts
 Improve CI/CD workflows
 
 Enhance documentation
-💡 Maintainer
 
+💡 Maintainer
 cluster-api-aws-provisioner
-Developed and maintained by Your Name
+Developed and maintained by Your Name.
 
 For suggestions or issues, please open a GitHub issue.
-
-
