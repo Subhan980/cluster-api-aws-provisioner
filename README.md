@@ -94,3 +94,77 @@ Cluster API AWS provider (CAPA)
 ---
 
 
+
+3️⃣ Generate Cluster Manifests
+
+clusterctl generate cluster aws-demo \
+  --infrastructure aws \
+  --kubernetes-version v1.29.0 \
+  --control-plane-machine-count=1 \
+  --worker-machine-count=2 > aws-cluster.yaml
+
+This command:
+
+Generates Kubernetes manifests for your AWS cluster
+
+Defines control plane and worker node configurations
+
+Prepares infrastructure definitions for deployment
+
+4️⃣ Apply and Create the Cluster
+
+kubectl apply -f aws-cluster.yaml
+CAPI and CAPA will automatically:
+
+Create VPC, subnets, and security groups
+
+Deploy the control plane and worker nodes
+
+Register the new cluster for management
+
+5️⃣ Verify the Cluster
+
+kubectl get clusters
+kubectl get machines
+Once provisioning completes, fetch the kubeconfig:
+
+clusterctl get kubeconfig aws-demo > demo.kubeconfig
+kubectl --kubeconfig=demo.kubeconfig get nodes
+📦 Repository Structure
+
+📁 cluster-api-aws-provisioner/
+ ├── config/                  # Cluster API configuration templates
+ ├── manifests/               # Generated YAML for clusters and machines
+ ├── scripts/                 # Helper scripts for bootstrap and cleanup
+ ├── docs/                    # Documentation and architecture notes
+ ├── .github/workflows/       # Optional CI/CD automation
+ └── README.md
+🧩 Future Enhancements
+🔹 Automate teardown and cleanup workflows
+
+🔹 Integrate AWS SSM for secure node access
+
+🔹 Add Terraform-based infra bootstrapping
+
+🔹 Support multi-region cluster provisioning
+
+🔹 Integrate cost dashboards and usage insights
+
+🤝 Contributing
+Contributions are welcome!
+You can:
+
+Extend cluster templates
+
+Add new automation scripts
+
+Improve CI/CD workflows
+
+Enhance documentation
+
+💡 Maintainer
+cluster-api-aws-provisioner
+Developed and maintained by Your Name.
+
+For suggestions or issues, please open a GitHub issue.
+
