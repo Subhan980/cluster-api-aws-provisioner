@@ -44,11 +44,6 @@ This implementation automates:
 ✅ Ready for production-grade deployments  
 
 ---
-
-## 🏗️ Architecture
-
-pgsql
-Copy code
      +-------------------------------------------+
      |          Management Cluster               |
      |-------------------------------------------|
@@ -73,8 +68,6 @@ Copy code
      |         Observability & Automation         |
      | (Prometheus, Grafana, Loki, Alerts)        |
      +-------------------------------------------+
-yaml
-Copy code
 
 ---
 
@@ -98,15 +91,17 @@ This installs:
 Cluster API core components
 
 Cluster API AWS provider (CAPA)
+---
+## **3️⃣ Generate Cluster Manifests**
 
-3️⃣ Generate Cluster Manifests
-bash
-Copy code
+```bash
 clusterctl generate cluster aws-demo \
   --infrastructure aws \
   --kubernetes-version v1.29.0 \
   --control-plane-machine-count=1 \
   --worker-machine-count=2 > aws-cluster.yaml
+
+
 4️⃣ Apply and Create the Cluster
 bash
 Copy code
