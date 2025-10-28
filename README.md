@@ -1,228 +1,156 @@
-# Kubernetes Cluster API Provider AWS
+# 🚀 cluster-api-aws-provisioner
 
-<p align="center">
-<img src="https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png"  width="100x"><a href="https://aws.amazon.com/opensource/"><img width="192x" src="https://d0.awsstatic.com/logos/powered-by-aws.png" alt="Powered by AWS Cloud Computing"></a>
-</p>
-<p align="center">
-<!-- go doc / reference card -->
-<a href="https://godoc.org/sigs.k8s.io/cluster-api-provider-aws">
-<img src="https://godoc.org/sigs.k8s.io/cluster-api-provider-aws?status.svg"></a>
-<!-- goreportcard badge -->
-<a href="https://goreportcard.com/report/sigs.k8s.io/cluster-api-provider-aws">
-<img src="https://goreportcard.com/badge/sigs.k8s.io/cluster-api-provider-aws"></a>
-<!-- join kubernetes slack channel for cluster-api-aws-provider -->
-<a href="http://slack.k8s.io/">
-<img src="https://img.shields.io/badge/join%20slack-%23cluster--api--aws-brightgreen"></a>
-<!-- openssf badge -->
-<a href="https://bestpractices.coreinfrastructure.org/projects/5688">
-<img src="https://bestpractices.coreinfrastructure.org/projects/5688/badge"></a>
-</p>
+A fully automated **Kubernetes Cluster API (CAPI)** implementation for **AWS**, enabling declarative cluster provisioning, scaling, and lifecycle management.
 
-------
+This project demonstrates **enterprise-grade Kubernetes infrastructure automation** using the **Cluster API Provider for AWS (CAPA)**.  
+It allows you to define, deploy, and manage complete EKS or self-managed clusters using native Kubernetes-style YAML manifests.
 
-Kubernetes-native declarative infrastructure for AWS.
+---
 
-## What is the Cluster API Provider AWS
+## 🌐 Overview
 
-The [Cluster API][cluster_api] brings
-declarative, Kubernetes-style APIs to cluster creation, configuration and
-management.
+**Cluster API (CAPI)** brings Kubernetes-style declarative APIs to cluster management —  
+allowing you to manage clusters just like any other Kubernetes resource.
 
-The API itself is shared across multiple cloud providers allowing for true AWS
-hybrid deployments of Kubernetes. It is built atop the lessons learned from
-previous cluster managers such as [kops][kops] and
-[kubicorn][kubicorn].
+This implementation automates:
+- VPC and networking creation
+- Control plane and worker node provisioning
+- Cluster scaling and upgrade workflows
+- Multi-cluster management from a single management cluster
 
-## Documentation
+---
 
-Please see our [book](https://cluster-api-aws.sigs.k8s.io) for in-depth documentation.
+## 🧩 Tech Stack
 
-## Launching a Kubernetes cluster on AWS
+| Tool | Purpose |
+|------|----------|
+| **Kubernetes** | Management plane for clusters |
+| **Cluster API (CAPI)** | Declarative cluster lifecycle management |
+| **Cluster API Provider AWS (CAPA)** | Infrastructure provider for AWS |
+| **Helm / Kustomize** | Configuration and templating |
+| **GitHub Actions** | (Optional) CI/CD automation for cluster provisioning |
 
-Check out the [Cluster API Quick Start](https://cluster-api.sigs.k8s.io/user/quick-start.html) for launching a
-cluster on AWS.
+---
 
-## Features
+## 🎯 Key Features
 
-- Native Kubernetes manifests and API
-- Manages the bootstrapping of VPCs, gateways, security groups and instances.
-- Choice of Linux distribution using [pre-baked AMIs][published_amis].
-- Deploys Kubernetes control planes into private subnets with a separate
-  bastion server.
-- Doesn't use SSH for bootstrapping nodes.
-- Installs only the minimal components to bootstrap a control plane and workers.
-- Supports control planes on EC2 instances.
-- [EKS support][eks_support]
+✅ Declarative cluster provisioning on AWS  
+✅ Fully managed control plane and worker nodes  
+✅ Support for EKS and self-managed Kubernetes clusters  
+✅ Secure VPC, subnet, and IAM role setup  
+✅ Rolling updates and scaling policies  
+✅ Works with your observability stack (Prometheus + Grafana + Loki)  
+✅ Ready for production-grade deployments  
 
-------
+---
 
-## Compatibility with Cluster API and Kubernetes Versions
+## 🏗️ Architecture
 
-This provider's versions are compatible with the following versions of Cluster API
-and support all Kubernetes versions that is supported by its compatible Cluster API version:
+         +-------------------------------------------+
+         |          Management Cluster               |
+         |-------------------------------------------|
+         | Cluster API + CAPA Controllers             |
+         | Custom Resources (Cluster, Machine, etc.)  |
+         +-------------------------------------------+
+                          │
+                          ▼
+         +-------------------------------------------+
+         |        AWS Infrastructure Provider         |
+         | (VPCs, Subnets, EC2, IAM, EKS)             |
+         +-------------------------------------------+
+                          │
+                          ▼
+         +-------------------------------------------+
+         |         Target Kubernetes Cluster          |
+         |  (Control Plane + Worker Nodes)            |
+         +-------------------------------------------+
+                          │
+                          ▼
+         +-------------------------------------------+
+         |         Observability & Automation         |
+         | (Prometheus, Grafana, Loki, Alerts)        |
+         +-------------------------------------------+
 
-|                             | Cluster API v1alpha4 (v0.4) | Cluster API v1beta1 (v1.x)  |
-| --------------------------- | :-------------------------: | :-------------------------: |
-| CAPA v1alpha4 `(v0.7)`      |              ✓              |              ☓              |
-| CAPA v1beta1  `(v1.x)`      |              ☓              |               ✓             |
-| CAPA v1beta2  `(v2.x, main)`|              ☓              |               ✓             |
+---
 
-(See [Kubernetes support matrix][cluster-api-supported-v] of Cluster API versions).
+## 🚀 Quick Start
 
-------
+### 1️⃣ Prerequisites
 
-## Kubernetes versions with published AMIs
+- AWS Account with programmatic access (CLI credentials)
+- A running management Kubernetes cluster
+- `kubectl`, `clusterctl`, and `aws` CLI installed
+- IAM permissions for EC2, VPC, and IAM resource creation
 
-See [amis] for the list of most recently published AMIs.
+---
 
-------
+### 2️⃣ Initialize the Management Cluster
 
-## clusterawsadm
+```bash
+clusterctl init --infrastructure aws
+This installs:
 
-`clusterawsadm` CLI tool provides bootstrapping, AMI, EKS, and controller related helpers.
+Cluster API core components
 
-`clusterawsadm` binaries are released with each release, can be found under [assets](https://github.com/kubernetes-sigs/cluster-api-provider-aws/releases/latest) section.
+Cluster API AWS provider (CAPA)
+3️⃣ Generate Cluster Manifests
+clusterctl generate cluster aws-demo \
+  --infrastructure aws \
+  --kubernetes-version v1.29.0 \
+  --control-plane-machine-count=1 \
+  --worker-machine-count=2 > aws-cluster.yaml
+  4️⃣ Apply and Create the Cluster
+  kubectl apply -f aws-cluster.yaml
+CAPI and CAPA will automatically:
 
-`clusterawsadm` could also be installed via Homebrew on macOS and linux OS.
-Install the latest release using homebrew:
+Create VPC, subnets, and security groups
 
-```shell
-brew install clusterawsadm
-```
+Deploy the control plane and worker nodes
 
-Test to ensure the version you installed is up-to-date:
+Register the new cluster for management
+5️⃣ Verify the Cluster
+kubectl get clusters
+kubectl get machines
 
-```shell
-clusterawsadm version
-```
+Once provisioning completes, fetch the kubeconfig:
+clusterctl get kubeconfig aws-demo > demo.kubeconfig
+kubectl --kubeconfig=demo.kubeconfig get nodes
+📦 Repository Structure
+📁 cluster-api-aws-provisioner/
+ ├── config/                  # Cluster API configuration templates
+ ├── manifests/               # Generated YAML for clusters and machines
+ ├── scripts/                 # Helper scripts for bootstrap and cleanup
+ ├── docs/                    # Documentation and architecture notes
+ ├── .github/workflows/       # Optional CI/CD automation
+ └── README.md
+Future Enhancements
 
-------
+🔹 Automate teardown and cleanup workflows
 
-## Getting involved and contributing
+🔹 Integrate AWS SSM for secure node access
 
-Are you interested in contributing to cluster-api-provider-aws? We, the
-maintainers and community, would love your suggestions, contributions, and help!
-Also, the maintainers can be contacted at any time to learn more about how to get
-involved.
+🔹 Add Terraform-based infra bootstrapping
 
-In the interest of getting more new people involved we tag issues with
-[`good first issue`][good_first_issue].
-These are typically issues that have smaller scope but are good ways to start
-to get acquainted with the codebase.
+🔹 Support multi-region cluster provisioning
 
-We also encourage ALL active community participants to act as if they are
-maintainers, even if you don't have "official" write permissions. This is a
-community effort, we are here to serve the Kubernetes community. If you have an
-active interest and you want to get involved, you have real power! Don't assume
-that the only people who can get things done around here are the "maintainers".
+🔹 Integrate cost dashboards and usage insights
+🤝 Contributing
 
-We also would love to add more "official" maintainers, so show us what you can
-do!
+Contributions are welcome!
+You can:
 
-This repository uses the Kubernetes bots.  See a full list of the commands [here][prow].
+Extend cluster templates
 
-### Build the images locally
+Add new automation scripts
 
-If you want to just build the CAPA containers locally, run
+Improve CI/CD workflows
 
-```shell
-  REGISTRY=docker.io/my-reg make docker-build
-```
+Enhance documentation
+💡 Maintainer
 
-### Tilt-based development environment
+cluster-api-aws-provisioner
+Developed and maintained by Your Name
 
-See [development][development] section for details.
+For suggestions or issues, please open a GitHub issue.
 
-### Implementer office hours
 
-Maintainers hold office hours every two weeks, with sessions open to all
-developers working on this project.
-
-Office hours are hosted on a zoom video chat every other Monday
-at 09:00 (Pacific) / 12:00 (Eastern) / 17:00 (Europe/London),
-and are published on the [Kubernetes community meetings calendar][gcal].
-
-### Other ways to communicate with the contributors
-
-Please check in with us in the [#cluster-api-aws][slack] channel on Slack.
-
-## Github issues
-
-### Bugs
-
-If you think you have found a bug please follow the instructions below.
-
-- Please spend a small amount of time giving due diligence to the issue tracker. Your issue might be a duplicate.
-- Get the logs from the cluster controllers. Please paste this into your issue.
-- Open a [new issue][new_issue].
-- Remember that users might be searching for your issue in the future, so please give it a meaningful title to help others.
-- Feel free to reach out to the cluster-api community on the [kubernetes slack][slack].
-
-### Tracking new features
-
-We also use the issue tracker to track features. If you have an idea for a feature, or think you can help kops become even more awesome follow the steps below.
-
-- Open a [new issue][new_issue].
-- Remember that users might be searching for your issue in the future, so please
-  give it a meaningful title to help others.
-- Clearly define the use case, using concrete examples. EG: I type `this` and
-  cluster-api-provider-aws does `that`.
-- Some of our larger features will require some design. If you would like to
-  include a technical design for your feature please include it in the issue.
-- After the new feature is well understood, and the design agreed upon, we can
-  start coding the feature. We would love for you to code it. So please open
-  up a **WIP** *(work in progress)* pull request, and happy coding.
-
->“Amazon Web Services, AWS, and the “Powered by AWS” logo materials are
-trademarks of Amazon.com, Inc. or its affiliates in the United States
-and/or other countries."
-
-## Our Contributors
-
-Thank you to all contributors and a special thanks to our current maintainers & reviewers:
-
-| Maintainers                                                      | Reviewers                                                            |
-|------------------------------------------------------------------| -------------------------------------------------------------------- |
-| [@richardcase](https://github.com/richardcase) (from 2020-12-04) | [@cnmcavoy](https://github.com/cnmcavoy) (from 2023-10-16)           |
-| [@Ankitasw](https://github.com/Ankitasw) (from 2022-10-19)       | [@AverageMarcus](https://github.com/AverageMarcus) (from 2022-10-19) |
-| [@dlipovetsky](https://github.com/dlipovetsky) (from 2021-10-31) | [@luthermonson](https://github.com/luthermonson ) (from 2023-03-08)  |
-| [@nrb](https://github.com/nrb) (from 2024-05-24)                 | [@faiq](https://github.com/faiq) (from 2023-10-16)                   |
-| [@AndiDog](https://github.com/AndiDog) (from 2023-12-13)         | [@fiunchinho](https://github.com/fiunchinho) (from 2023-11-6)        |
-|                                                                  | [@damdo](https://github.com/damdo) (from 2023-03-01)                 |
-
-and the previous/emeritus maintainers & reviewers:
-
-| Emeritus Maintainers                                 | Emeritus Reviewers                                     |
-|------------------------------------------------------|--------------------------------------------------------|
-| [@chuckha](https://github.com/chuckha)               | [@ashish-amarnath](https://github.com/ashish-amarnath) |
-| [@detiber](https://github.com/detiber)               | [@davidewatson](https://github.com/davidewatson)       |
-| [@ncdc](https://github.com/ncdc)                     | [@enxebre](https://github.com/enxebre)                 |
-| [@randomvariable](https://github.com/randomvariable) | [@ingvagabund](https://github.com/ingvagabund)         |
-| [@rudoi](https://github.com/rudoi)                   | [@michaelbeaumont](https://github.com/michaelbeaumont) |
-| [@sedefsavas](https://github.com/sedefsavas)         | [@sethp-nr](https://github.com/sethp-nr)               |
-| [@Skarlso](https://github.com/Skarlso)               | [@shivi28](https://github.com/shivi28)                 |
-| [@vincepri](https://github.com/vincepri)             | [@dthorsen](https://github.com/dthorsen)               |
-|                                                      | [@pydctw](https://github.com/pydctw)                   |
-
-All the CAPA contributors:
-
-<p>
-<a href="https://github.com/kubernetes-sigs/cluster-api-provider-aws/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=kubernetes-sigs/cluster-api-provider-aws" />
-</a>
-</p>
-
-<!-- References -->
-[slack]: https://kubernetes.slack.com/messages/CD6U2V71N
-[good_first_issue]: https://github.com/kubernetes-sigs/cluster-api-provider-aws/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22good+first+issue%22
-[gcal]: https://calendar.google.com/calendar/embed?src=cgnt364vd8s86hr2phapfjc6uk%40group.calendar.google.com
-[prow]: https://go.k8s.io/bot-commands
-[new_issue]: https://github.com/kubernetes-sigs/cluster-api-provider-aws/issues/new
-[cluster_api]: https://github.com/kubernetes-sigs/cluster-api
-[kops]: https://github.com/kubernetes/kops
-[kubicorn]: http://kubicorn.io/
-[amis]: https://cluster-api-aws.sigs.k8s.io/topics/images/amis.html
-[published_amis]: https://cluster-api-aws.sigs.k8s.io/topics/images/built-amis.html
-[eks_support]: https://cluster-api-aws.sigs.k8s.io/topics/eks/index.html
-[cluster-api-supported-v]: https://cluster-api.sigs.k8s.io/reference/versions.html
-[development]: https://cluster-api-aws.sigs.k8s.io/development/development.html
